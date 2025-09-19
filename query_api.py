@@ -13,18 +13,6 @@
     Notes
         - Sometimes files need to be saved to e.g. Downloads, as long file names mean they
         cannot always be saved in the intended location
-        - When tested on WM2025
-            - Tables generally came in with excess whitespace at the bottom (e.g.
-            https://app.datawrapper.de/edit/kgU97/edit)
-            - Some charts also had excess whitespace at the bottom (e.g.
-            https://app.datawrapper.de/edit/4y8jS/publish#export-svg)
-            - In some cases there were additional gridlines and axis labels were added (e.g.
-            https://app.datawrapper.de/edit/31VXr/publish#export-svg)
-        These all probably stem from the fact that, using the front end, we export SVGs with the
-        'Auto' option selected when exporting just the chart body. This means the height is set
-        to just the chart body height, rather than the chart body being stretched to the full
-        height of the chart before the header and footer are removed. Using the API, as of
-        December 2024, it doesn't seem to be possible to use such an 'Auto' option
 """
 
 import os
@@ -35,7 +23,7 @@ from requests.exceptions import ReadTimeout
 # %%
 # SET PARAMETERS
 DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
-BASE_FOLDER_ID = 315975
+BASE_FOLDER_ID = 350839
 BASE_PATH = "C:/Users/nyep/Downloads"
 
 # %%
@@ -64,7 +52,10 @@ def export_charts(
             None
 
         Notes:
-            None
+            - height="auto" is not the same as supplying None: the former exports the
+            chart at its height in the Datawrapper UI, minus height required for the
+            header and footer; the latter exports the chart at its full height (even
+            where plain=True is supplied)
     """
 
     folder = dw.get_folder(
@@ -96,7 +87,7 @@ def export_charts(
                 try:
                     dw.export_chart(
                         chart_id=chart["id"],
-                        width=853,
+                        width=None,
                         height="auto",
                         border_width=0,
                         output="svg",
