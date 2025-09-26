@@ -8,8 +8,7 @@
     Outputs
         - svg: Various
     Notes
-        - Sometimes files need to be saved to e.g. Downloads, as long file names mean they
-        cannot always be saved in the intended location
+        - Sometimes files need to be saved to e.g. Downloads, as long file names mean they cannot always be saved in the intended location
 """
 
 import os
@@ -19,7 +18,7 @@ import pandas as pd
 from requests.exceptions import ReadTimeout
 
 # %%
-# SET PARAMETERS
+# SET CONSTANTS
 DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
 BASE_FOLDER_ID = 320633
 BASE_PATH = "C:/Users/nyep/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/3. Adult social care"
@@ -45,6 +44,7 @@ print(base_folder["name"])
 
 # %%
 def export_charts(
+    dw: Datawrapper,
     folder_id: int,
     path: str,
     max_retries: int = 5,
@@ -54,6 +54,7 @@ def export_charts(
         Parse folder structure and export all charts to SVG.
 
         Parameters:
+            - dw: Datawrapper instance
             - folder_id: The ID of the base folder
             - path: Base path for exporting charts
             - max_retries: Maximum number of retry attempts for chart export (default: 5)
@@ -132,8 +133,9 @@ def export_charts(
 
 # %%
 export_charts(
-    BASE_FOLDER_ID,
-    BASE_PATH
+    dw=dw,
+    folder_id=BASE_FOLDER_ID,
+    path=BASE_PATH
 )
 
 # %%
