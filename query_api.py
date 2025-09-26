@@ -45,17 +45,17 @@ print(base_folder["name"])
 
 # %%
 def export_charts(
-    base_folder_id: int,
-    base_path: str,
+    folder_id: int,
+    path: str,
     max_retries: int = 5,
     recursive: bool = False
 ) -> None:
     """"
-        Parse folder structure and export all charts to SVG
+        Parse folder structure and export all charts to SVG.
 
         Parameters:
-            - BASE_FOLDER_ID: The ID of the base folder
-            - BASE_PATH: Base path for exporting charts
+            - folder_id: The ID of the base folder
+            - path: Base path for exporting charts
             - max_retries: Maximum number of retry attempts for chart export (default: 5)
             - recursive: Whether to recursively browse sub-folders (default: False)
 
@@ -63,38 +63,27 @@ def export_charts(
             None
 
         Notes:
-            - height="auto" is not the same as supplying None: the former exports the
-            chart at its height in the Datawrapper UI, minus height required for the
-            header and footer; the latter exports the chart at its full height (even
-            where plain=True is supplied)
+            - height="auto" is not the same as supplying None: the former exports the chart at its height in the Datawrapper UI, minus height required for the header and footer; the latter exports the chart at its full height (even where plain=True is supplied)
     """
 
     folder = dw.get_folder(
-        folder_id=base_folder_id
+        folder_id=folder_id
     )
-
-    path_folder = os.path.join(
-        base_path,
-        folder["name"]
-    )
-
-    if not os.path.exists(path_folder):
-        os.makedirs(path_folder)
 
     if folder["charts"]:
         for chart in folder["charts"]:
-            title = dw.get_chart(
-                chart_id=chart["id"]
-            )["title"]
+            title = dw.get_chart(chart_id=chart["id"])["title"]
 
             # Look up chart number from df_chart_numbering
             chart_number_row = df_chart_numbering[df_chart_numbering['Chart ID'] == chart["id"]]
+
             if not chart_number_row.empty:
                 chart_number = chart_number_row.iloc[0]['Chart number']
                 filename = chart_number
                 print(f"Exporting chart {chart["id"]}-{title} as {filename}")
+
+            # Fallback to original naming if chart ID not found in lookup
             else:
-                # Fallback to original naming if chart ID not found in lookup
                 title_clean = title.replace("/", "").replace(":", "")
                 filename = f"{chart["id"]}-{title_clean}"
                 print(f"Chart ID {chart["id"]} not found in lookup table. Using fallback name: {filename}")
@@ -112,7 +101,7 @@ def export_charts(
                         border_width=0,
                         output="svg",
                         plain=True,
-                        filepath=path_folder + f"/{filename}.svg",
+                        filepath=path + f"/{filename}.svg",
                         display=False
                     )
                     break
@@ -126,10 +115,14 @@ def export_charts(
     # Recursively process child folders if recursive flag is True
     if recursive:
         for child_folder in folder["children"]:
+            path = path + f"/{folder['name']}"
+
+            if not os.path.exists(path):
+                os.makedirs(path)
 
             export_charts(
-                base_folder_id=child_folder["id"],
-                base_path=path_folder,
+                folder_id=child_folder["id"],
+                path=path,
                 max_retries=max_retries,
                 recursive=recursive
             )
