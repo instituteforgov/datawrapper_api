@@ -1,7 +1,7 @@
 # %%
 """
     Purpose
-        Use Datawrapper API to export charts to SVG
+        Export charts
     Inputs
         - API: Datawrapper API
         - xlsx: Chart numbering lookup file
