@@ -49,15 +49,19 @@ print(base_folder["name"])
 
 # %%
 def export_charts(
-    BASE_FOLDER_ID: int,
-    BASE_PATH: str,
-    max_retries: int = 5
+    base_folder_id: int,
+    base_path: str,
+    max_retries: int = 5,
+    recursive: bool = False
 ) -> None:
     """"
-        Recursively parse folder structure and export all charts to SVG
+        Parse folder structure and export all charts to SVG
 
         Parameters:
             - BASE_FOLDER_ID: The ID of the base folder
+            - BASE_PATH: Base path for exporting charts
+            - max_retries: Maximum number of retry attempts for chart export (default: 5)
+            - recursive: Whether to recursively browse sub-folders (default: False)
 
         Returns:
             None
@@ -70,11 +74,11 @@ def export_charts(
     """
 
     folder = dw.get_folder(
-        folder_id=BASE_FOLDER_ID
+        folder_id=base_folder_id
     )
 
     path_folder = os.path.join(
-        BASE_PATH,
+        base_path,
         folder["name"]
     )
 
@@ -123,12 +127,16 @@ def export_charts(
                 except ValueError:
                     print(f"Error exporting chart {filename}")
 
-    for child_folder in folder["children"]:
+    # Recursively process child folders if recursive flag is True
+    if recursive:
+        for child_folder in folder["children"]:
 
-        export_charts(
-            BASE_FOLDER_ID=child_folder["id"],
-            BASE_PATH=path_folder
-        )
+            export_charts(
+                base_folder_id=child_folder["id"],
+                base_path=path_folder,
+                max_retries=max_retries,
+                recursive=recursive
+            )
 
     return
 
