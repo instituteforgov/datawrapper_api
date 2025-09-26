@@ -4,6 +4,7 @@
         Use Datawrapper API to export charts to SVG
     Inputs
         - API: Datawrapper API
+        - xlsx: Chart numbering lookup file
     Outputs
         - svg: Various
     Parameters
@@ -18,13 +19,23 @@
 import os
 
 from datawrapper import Datawrapper
+import pandas as pd
 from requests.exceptions import ReadTimeout
 
 # %%
 # SET PARAMETERS
 DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
-BASE_FOLDER_ID = 350839
-BASE_PATH = "C:/Users/nyep/Downloads"
+BASE_FOLDER_ID = 320633
+BASE_PATH = "C:/Users/nyep/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/3. Adult social care"
+CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/3. Adult social care/ASC chart label lookup.xlsx"
+
+# %%
+# IMPORT CHART NUMBERING
+if CHART_NUMBERING_FILE_PATH:
+    df_chart_numbering = pd.read_excel(
+        CHART_NUMBERING_FILE_PATH,
+        dtype={"Chart ID": str}
+    )
 
 # %%
 # INITIALISE
@@ -76,11 +87,20 @@ def export_charts(
                 chart_id=chart["id"]
             )["title"]
 
-            print(f"Exporting chart {chart["id"]}-{title}")
+            # Look up chart number from df_chart_numbering
+            chart_number_row = df_chart_numbering[df_chart_numbering['Chart ID'] == chart["id"]]
+            if not chart_number_row.empty:
+                chart_number = chart_number_row.iloc[0]['Chart number']
+                filename = chart_number
+                print(f"Exporting chart {chart["id"]}-{title} as {filename}")
+            else:
+                # Fallback to original naming if chart ID not found in lookup
+                title_clean = title.replace("/", "").replace(":", "")
+                filename = f"{chart["id"]}-{title_clean}"
+                print(f"Chart ID {chart["id"]} not found in lookup table. Using fallback name: {filename}")
 
-            # Remove characters that break file paths
-            title = title.replace("/", "")
-            title = title.replace(":", "")
+            # Remove characters that break file paths from filename
+            filename = filename.replace("/", "").replace(":", "")
 
             for _ in range(max_retries):
 
@@ -92,7 +112,7 @@ def export_charts(
                         border_width=0,
                         output="svg",
                         plain=True,
-                        filepath=path_folder + f"/{chart["id"]}-{title}.svg",
+                        filepath=path_folder + f"/{filename}.svg",
                         display=False
                     )
                     break
@@ -101,7 +121,7 @@ def export_charts(
                     pass
 
                 except ValueError:
-                    print(f"Error exporting chart {chart["id"]}-{title}")
+                    print(f"Error exporting chart {filename}")
 
     for child_folder in folder["children"]:
 
