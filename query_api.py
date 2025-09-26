@@ -7,10 +7,6 @@
         - xlsx: Chart numbering lookup file
     Outputs
         - svg: Various
-    Parameters
-        - DATAWRAPPER_API_TOKEN: Datawrapper API token
-        - BASE_FOLDER_ID: ID of the base folder
-        - BASE_PATH: Base path for exporting charts
     Notes
         - Sometimes files need to be saved to e.g. Downloads, as long file names mean they
         cannot always be saved in the intended location
