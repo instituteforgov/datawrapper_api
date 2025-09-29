@@ -20,9 +20,9 @@ from requests.exceptions import ReadTimeout
 # %%
 # SET CONSTANTS
 DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
-BASE_FOLDER_ID = 320633
-BASE_PATH = "C:/Users/nyep/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/3. Adult social care"
-CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/3. Adult social care/ASC chart label lookup.xlsx"
+BASE_FOLDER_ID = 325652
+BASE_PATH = "C:/Users/nyep/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/5. NS"
+CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/5. NS/Chart numbering - Homelessness.xlsx"
 
 # %%
 # IMPORT CHART NUMBERING
