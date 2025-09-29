@@ -123,7 +123,7 @@ charts_data = get_charts(
 # Save details
 if charts_data:
     df = pd.DataFrame(charts_data)
-    df = df[["Chart number", "Chart ID", "Chart title", "Iframe code", "Folder path"]]
+    df = df[["Chart number", "Chart ID", "Chart title", "iframe code", "Folder path"]]
     df.to_excel(OUTPUT_PATH, index=False)
 
     print("-" * 50)
