@@ -6,9 +6,12 @@
         - API: Datawrapper API
         - xlsx: Chart numbering lookup file
     Outputs
-        - svg: Various
+        - svg/png: Various
     Notes
         - Sometimes files need to be saved to e.g. Downloads, as long file names mean they cannot always be saved in the intended location
+    Future enhancements
+        - Add setting to allow both SVG and PNG export (handling difference in `plain` parameter)
+        - Add arg to skip charts without a chart number in the lookup file
 """
 
 import os
@@ -20,9 +23,9 @@ from requests.exceptions import ReadTimeout
 # %%
 # SET CONSTANTS
 DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
-BASE_FOLDER_ID = 325652
+BASE_FOLDER_ID = 324142
 BASE_PATH = "C:/Users/nyep/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/5. NS"
-CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/5. NS/Chart numbering - Homelessness.xlsx"
+CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/5. NS/Chart numbering - X-local govt.xlsx"
 
 # %%
 # IMPORT CHART NUMBERING
@@ -51,7 +54,7 @@ def export_charts(
     recursive: bool = False
 ) -> None:
     """"
-        Parse folder structure and export all charts to SVG.
+        Parse folder structure and export all charts.
 
         Parameters:
             - dw: Datawrapper instance
