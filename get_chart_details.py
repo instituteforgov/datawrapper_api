@@ -60,22 +60,27 @@ def get_charts(
                 try:
                     chart_details = dw.get_chart(chart_id=chart["id"])
 
-                    # Get responsive iframe code
-                    try:
-                        iframe_code = dw.get_iframe_code(chart_id=chart["id"], responsive=True)
-                    except Exception as iframe_error:
-                        print(f"    Warning: Could not get iframe code for chart {chart['id']}: {iframe_error}")
-                        iframe_code = "Error retrieving iframe code"
+                    # Skip charts without a proper title
+                    # NB: For some reason, there seem to tend to be a few blank charts per folder, not visible in the UI
+                    chart_title = chart_details["title"]
+                    if chart_title != "[ Insert title here ]":
 
-                    chart_info = {
-                        "Chart number": "",
-                        "Chart ID": chart["id"],
-                        "Chart title": chart_details.get("title", "Untitled"),
-                        "iframe code": iframe_code,
-                        "Folder path": current_path
-                    }
-                    charts_data.append(chart_info)
-                    print(f"  Found chart: {chart['id']} - {chart_info['Chart title']}")
+                        # Get responsive iframe code
+                        try:
+                            iframe_code = dw.get_iframe_code(chart_id=chart["id"], responsive=True)
+                        except Exception as iframe_error:
+                            print(f"    Warning: Could not get iframe code for chart {chart['id']}: {iframe_error}")
+                            iframe_code = "Error retrieving iframe code"
+
+                        chart_info = {
+                            "Chart number": "",
+                            "Chart ID": chart["id"],
+                            "Chart title": chart_title,
+                            "iframe code": iframe_code,
+                            "Folder path": current_path
+                        }
+                        charts_data.append(chart_info)
+                        print(f"  Found chart: {chart['id']} - {chart_info['Chart title']}")
 
                 except Exception as e:
                     chart_info = {
