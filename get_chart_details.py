@@ -5,7 +5,7 @@
     Inputs
         - API: Datawrapper API
     Outputs
-        - xlsx:
+        - xlsx: Chart numbering lookup file
     Notes
         None
 """
@@ -19,8 +19,8 @@ import pandas as pd
 # %%
 # SET CONSTANTS
 DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
-FOLDER_ID = 325652
-OUTPUT_PATH = "chart_numbering_homelessness.xlsx"
+FOLDER_ID = 324142
+OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/5. NS/Chart numbering - X-local govt.xlsx"
 
 
 # %%
