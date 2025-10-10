@@ -10,7 +10,6 @@
     Notes
         - Sometimes files need to be saved to e.g. Downloads, as long file names mean they cannot always be saved in the intended location
     Future enhancements
-        - Add setting to allow both SVG and PNG export (handling difference in `plain` parameter)
         - Add arg to skip charts without a chart number in the lookup file
 """
 
@@ -23,9 +22,9 @@ from requests.exceptions import ReadTimeout
 # %%
 # SET CONSTANTS
 DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
-BASE_FOLDER_ID = 324142
-BASE_PATH = "C:/Users/nyep/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/5. NS"
-CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/5. NS/Chart numbering - X-local govt.xlsx"
+BASE_FOLDER_ID = 293106
+BASE_PATH = "C:/Users/nyep/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/7. Police"
+CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/7. Police/Chart numbering - Police.xlsx"
 
 # %%
 # IMPORT CHART NUMBERING
@@ -50,8 +49,10 @@ def export_charts(
     dw: Datawrapper,
     folder_id: int,
     path: str,
+    output: str,
     max_retries: int = 5,
-    recursive: bool = False
+    recursive: bool = False,
+    **kwargs,
 ) -> None:
     """"
         Parse folder structure and export all charts.
@@ -60,8 +61,10 @@ def export_charts(
             - dw: Datawrapper instance
             - folder_id: The ID of the base folder
             - path: Base path for exporting charts
+            - output: Export format (e.g. "png" or "svg")
             - max_retries: Maximum number of retry attempts for chart export (default: 5)
             - recursive: Whether to recursively browse sub-folders (default: False)
+            - **kwargs: Additional keyword arguments to pass to the export function
 
         Returns:
             None
@@ -103,10 +106,10 @@ def export_charts(
                         width=None,
                         height="auto",
                         border_width=0,
-                        output="svg",
-                        plain=True,
-                        filepath=path + f"/{filename}.svg",
-                        display=False
+                        output=output,
+                        filepath=path + f"/{filename}.{output}",
+                        display=False,
+                        **kwargs
                     )
                     break
 
@@ -135,10 +138,18 @@ def export_charts(
 
 
 # %%
-export_charts(
-    dw=dw,
-    folder_id=BASE_FOLDER_ID,
-    path=BASE_PATH
-)
+export_formats = {
+    "svg": {"plain": True},
+    "png": {"plain": False},
+}
+
+for format, options in export_formats.items():
+    export_charts(
+        dw=dw,
+        folder_id=BASE_FOLDER_ID,
+        path=BASE_PATH,
+        output=format,
+        **options
+    )
 
 # %%
