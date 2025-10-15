@@ -22,9 +22,9 @@ from requests.exceptions import ReadTimeout
 # %%
 # SET CONSTANTS
 DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
-BASE_FOLDER_ID = 293186
-BASE_PATH = "C:/Users/" + os.getlogin() + "/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/8. Criminal courts"
-CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/8. Criminal courts/Chart numbering - Criminal courts.xlsx"
+BASE_FOLDER_ID = 312749
+BASE_PATH = "C:/Users/" + os.getlogin() + "/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/9. Prisons"
+CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/9. Prisons/Chart numbering - Prisons.xlsx"
 
 # %%
 # IMPORT CHART NUMBERING
@@ -79,45 +79,49 @@ def export_charts(
 
     if folder["charts"]:
         for chart in folder["charts"]:
-            title = dw.get_chart(chart_id=chart["id"])["title"]
 
-            # Look up chart number from df_chart_numbering
-            chart_number_row = df_chart_numbering[df_chart_numbering['Chart ID'] == chart["id"]]
+            # Skip charts without a proper title
+            # NB: For some reason, there seem to tend to be a few blank charts per folder, not visible in the UI
+            chart_title = dw.get_chart(chart_id=chart["id"])["title"]
+            if chart_title != "[ Insert title here ]":
 
-            if not chart_number_row.empty:
-                chart_number = chart_number_row.iloc[0]['Chart number']
-                filename = chart_number
-                print(f"Exporting chart {chart["id"]}-{title} as {filename}")
+                # Look up chart number from df_chart_numbering
+                chart_number_row = df_chart_numbering[df_chart_numbering['Chart ID'] == chart["id"]]
 
-            # Fallback to original naming if chart ID not found in lookup
-            else:
-                title_clean = title.replace("/", "").replace(":", "")
-                filename = f"{chart["id"]}-{title_clean}"
-                print(f"Chart ID {chart["id"]} not found in lookup table. Using fallback name: {filename}")
+                if not chart_number_row.empty:
+                    chart_number = chart_number_row.iloc[0]['Chart number']
+                    filename = chart_number
+                    print(f"Exporting chart {chart["id"]}-{chart_title} as {filename}")
 
-            # Remove characters that break file paths from filename
-            filename = filename.replace("/", "").replace(":", "")
+                # Fallback to original naming if chart ID not found in lookup
+                else:
+                    title_clean = chart_title.replace("/", "").replace(":", "")
+                    filename = f"{chart["id"]}-{title_clean}"
+                    print(f"Chart ID {chart["id"]} not found in lookup table. Using fallback name: {filename}")
 
-            for _ in range(max_retries):
+                # Remove characters that break file paths from filename
+                filename = filename.replace("/", "").replace(":", "")
 
-                try:
-                    dw.export_chart(
-                        chart_id=chart["id"],
-                        width=None,
-                        height="auto",
-                        border_width=0,
-                        output=output,
-                        filepath=path + f"/{filename}.{output}",
-                        display=False,
-                        **kwargs
-                    )
-                    break
+                for _ in range(max_retries):
 
-                except ReadTimeout:
-                    pass
+                    try:
+                        dw.export_chart(
+                            chart_id=chart["id"],
+                            width=None,
+                            height="auto",
+                            border_width=0,
+                            output=output,
+                            filepath=path + f"/{filename}.{output}",
+                            display=False,
+                            **kwargs
+                        )
+                        break
 
-                except ValueError:
-                    print(f"Error exporting chart {filename}")
+                    except ReadTimeout:
+                        pass
+
+                    except ValueError:
+                        print(f"Error exporting chart {filename}")
 
     # Recursively process child folders if recursive flag is True
     if recursive:
