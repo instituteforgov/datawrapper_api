@@ -12,20 +12,20 @@
 
 import os
 
-from datawrapper import Datawrapper
 import pandas as pd
+
+from utils import get_chart, get_folder, get_iframe_code, validate_api_token
 
 
 # %%
 # SET CONSTANTS
-DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
 FOLDER_ID = 312749
-OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/9. Prisons/Chart numbering - Prisons.xlsx"
+OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/9. Prisons/Testing/Chart numbering - Prisons.xlsx"
 
 
 # %%
-def get_charts(
-    dw: Datawrapper,
+# DEFINE FUNCTIONS
+def get_chart_details(
     folder_id: int,
     dw_folder_path: str = "",
     recursive: bool = False,
@@ -34,10 +34,9 @@ def get_charts(
     Get details all charts from a folder.
 
     Parameters:
-        - dw: Datawrapper instance
-        - folder_id: The ID of the folder to list charts from
-        - dw_folder_path: Folder path within Datawrapper for tracking hierarchy
-        - recursive: Whether to include charts from subfolders
+        folder_id: The ID of the folder to list charts from
+        dw_folder_path: Folder path within Datawrapper for tracking hierarchy
+        recursive: Whether to include charts from subfolders
 
     Returns:
         List of dictionaries containing chart information
@@ -46,7 +45,7 @@ def get_charts(
     charts_data = []
 
     try:
-        folder = dw.get_folder(folder_id=folder_id)
+        folder = get_folder(folder_id=folder_id)
         folder_name = folder["name"]
 
         # Update folder path
@@ -58,7 +57,7 @@ def get_charts(
         if folder.get("charts"):
             for chart in folder["charts"]:
                 try:
-                    chart_details = dw.get_chart(chart_id=chart["id"])
+                    chart_details = get_chart(chart_id=chart["id"])
 
                     # Skip charts without a proper title
                     # NB: For some reason, there seem to tend to be a few blank charts per folder, not visible in the UI
@@ -67,7 +66,7 @@ def get_charts(
 
                         # Get responsive iframe code
                         try:
-                            iframe_code = dw.get_iframe_code(chart_id=chart["id"], responsive=True)
+                            iframe_code = get_iframe_code(chart_id=chart["id"], responsive=True)
                         except Exception as iframe_error:
                             print(f"    Warning: Could not get iframe code for chart {chart['id']}: {iframe_error}")
                             iframe_code = "Error retrieving iframe code"
@@ -94,8 +93,7 @@ def get_charts(
                     print(f"  Error getting details for chart {chart['id']}: {e}")
         if recursive and folder.get("children"):
             for child_folder in folder["children"]:
-                child_charts = get_charts(
-                    dw=dw,
+                child_charts = get_chart_details(
                     folder_id=child_folder["id"],
                     recursive=True,
                     dw_folder_path=current_path
@@ -109,19 +107,15 @@ def get_charts(
 
 
 # %%
-if not DATAWRAPPER_API_TOKEN:
-    raise ValueError("DATAWRAPPER_API_TOKEN environment variable not set")
-
-# Initialise Datawrapper
-dw = Datawrapper(access_token=DATAWRAPPER_API_TOKEN)
+# EXECUTE
+validate_api_token()
 
 print(f"Listing charts from folder ID: {FOLDER_ID}")
 print(f"Output file: {OUTPUT_PATH}")
 print("-" * 50)
 
 # Get all charts
-charts_data = get_charts(
-    dw=dw,
+charts_data = get_chart_details(
     folder_id=FOLDER_ID,
 )
 
