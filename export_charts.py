@@ -24,7 +24,7 @@ from utils import export_chart, get_chart, get_folder, validate_api_token
 # SET CONSTANTS
 BASE_FOLDER_ID = 312749
 BASE_PATH = "C:/Users/" + os.getlogin() + "/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/9. Prisons/Testing"
-CHART_NUMBERING_FILE_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/9. Prisons/Testing/Chart numbering - Prisons.xlsx"
+CHART_NUMBERING_FILE_PATH = BASE_PATH + "/Chart numbering - Prisons.xlsx"
 
 
 # %%
