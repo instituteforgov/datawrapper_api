@@ -19,8 +19,8 @@ from utils import get_chart, get_folder, get_iframe_code, validate_api_token
 
 # %%
 # SET CONSTANTS
-FOLDER_ID = 312749
-OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/9. Prisons/Testing/Chart numbering - Prisons.xlsx"
+FOLDER_ID = 320631
+OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/1. General practice/Chart numbering - General practice.xlsx"
 
 
 # %%
