@@ -36,6 +36,8 @@ def export_charts(
     max_retries: int = 5,
     recursive: bool = False,
     skip_folder_name: str = "Archive",
+    flatten_path: bool = False,
+    flatten_path: bool = False,
     chart_numbering_df: pd.DataFrame | None = None,
     **kwargs,
 ) -> None:
@@ -49,6 +51,7 @@ def export_charts(
             max_retries: Maximum number of retry attempts for chart export (default: 5)
             recursive: Whether to recursively browse sub-folders (default: False)
             skip_folder_name: Name of folders to skip (default: "Archive")
+            flatten_path: Whether to flatten the folder structure in the export path (default: False)
             chart_numbering_df: DataFrame containing chart numbering lookup
             **kwargs: Additional keyword arguments to pass to the export_chart() function
 
@@ -129,8 +132,12 @@ def export_charts(
             if folder_id == FOLDER_ID:
                 child_path = path
             else:
-                # Construct the path for the child folder
-                child_path = os.path.join(path, folder["name"])
+                # Determine the path for saving charts
+                if flatten_path:
+                    child_path = path  # Use the root path for all charts
+                else:
+                    # Construct the path for the child folder
+                    child_path = os.path.join(path, folder["name"])
 
             if not os.path.exists(child_path):
                 os.makedirs(child_path)
@@ -142,6 +149,7 @@ def export_charts(
                 max_retries=max_retries,
                 recursive=recursive,
                 skip_folder_name=skip_folder_name,
+                flatten_path=flatten_path,
                 chart_numbering_df=chart_numbering_df,
                 **kwargs,
             )
