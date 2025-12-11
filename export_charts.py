@@ -70,33 +70,34 @@ def export_charts(
 
             # Skip charts without a proper title
             # NB: For some reason, there seem to tend to be a few blank charts per folder, not visible in the UI
-            chart_title = get_chart(chart_id=chart["id"])["title"]
-            if chart_title != "[ Insert title here ]":
+            title = get_chart(chart_id=chart["id"])["title"]
+            if title != "[ Insert title here ]":
+
+                # Clean title for filename
+                title_clean = title.replace("/", "").replace(":", "")
 
                 # Look up chart number from chart_numbering_df if provided
                 if chart_numbering_df is not None:
-                    chart_number_row = chart_numbering_df[chart_numbering_df['Chart ID'] == chart["id"]]
+                    chart_numbering_row = chart_numbering_df[chart_numbering_df['Chart ID'] == chart["id"]]
 
-                    if not chart_number_row.empty:
-                        chart_number = chart_number_row.iloc[0]['Chart number']
+                    if not chart_numbering_row.empty:
+                        chart_number = chart_numbering_row.iloc[0]['Chart number']
                         # Handle case where chart_number might be NaN
                         if pd.isna(chart_number):
-                            filename = f"{chart["id"]}-{chart_title.replace("/", "").replace(":", "")}"
+                            filename = f"{chart["id"]}-{title.replace("/", "").replace(":", "")}"
                             print(f"Chart ID {chart["id"]} has blank chart number. Using fallback name: {filename}")
                         else:
                             filename = str(chart_number)
-                            print(f"Exporting chart {chart["id"]}-{chart_title} as {filename}")
+                            print(f"Exporting chart {chart["id"]}-{title} as {filename}")
 
                     # Fallback to original naming if chart ID not found in lookup
                     else:
-                        title_clean = chart_title.replace("/", "").replace(":", "")
                         filename = f"{chart["id"]}-{title_clean}"
                         print(f"Chart ID {chart["id"]} not found in lookup table. Using fallback name: {filename}")
                 else:
                     # No chart numbering provided, use chart ID and title
-                    title_clean = chart_title.replace("/", "").replace(":", "")
                     filename = f"{chart["id"]}-{title_clean}"
-                    print(f"Exporting chart {chart["id"]}-{chart_title} as {filename}")
+                    print(f"Exporting chart {chart["id"]}-{title} as {filename}")
 
                 # Remove characters that break file paths from filename
                 filename = str(filename).replace("/", "").replace(":", "")
