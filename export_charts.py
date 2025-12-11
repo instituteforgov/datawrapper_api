@@ -14,9 +14,10 @@
 """
 
 import os
+import time
 
 import pandas as pd
-from requests.exceptions import ReadTimeout
+from requests.exceptions import HTTPError, ReadTimeout
 
 from utils import clean_filename, export_chart, get_chart, get_folder, validate_api_token
 
@@ -101,7 +102,7 @@ def export_charts(
                 # Remove characters that break file paths from filename
                 filename = clean_filename(filename)
 
-                for _ in range(max_retries):
+                for attempt in range(max_retries):
 
                     try:
                         export_chart(
@@ -116,10 +117,18 @@ def export_charts(
                         break
 
                     except ReadTimeout:
-                        pass
+                        wait_time = 2 ** attempt
+                        print(f"Timeout occurred while exporting chart {filename}. Retrying in {wait_time} seconds...")
+                        time.sleep(wait_time)
+
+                    except HTTPError as http_err:
+                        wait_time = 2 ** attempt
+                        print(f"HTTP error occurred while exporting chart {filename}: {http_err}. Retrying in {wait_time} seconds...")
+                        time.sleep(wait_time)
 
                     except ValueError:
-                        print(f"Error exporting chart {filename}")
+                        print(f"ValueError occurred while exporting chart {filename}")
+                        break
 
     # Recursively process child folders if recursive flag is True
     if recursive:

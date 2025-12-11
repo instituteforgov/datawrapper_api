@@ -11,9 +11,11 @@
 """
 
 import os
+import time
 
 import pandas as pd
 from pandas.io.formats import excel
+from requests.exceptions import HTTPError
 
 from utils import get_chart, get_folder, get_iframe_code, validate_api_token
 
@@ -30,6 +32,7 @@ CHART_NUMBERING_FILE_PATH = OUTPUT_PATH + "/Chart numbering - WM2026.xlsx"
 def get_chart_details(
     folder_id: int,
     dw_folder_path: str = "",
+    max_retries: int = 5,
     recursive: bool = False,
     skip_folder_name: str = "Archive",
 ) -> list[dict]:
@@ -39,6 +42,7 @@ def get_chart_details(
     Parameters:
         folder_id: The ID of the folder to list charts from
         dw_folder_path: Folder path within Datawrapper for tracking hierarchy
+        max_retries: Maximum number of retry attempts for chart retrieval (default: 5)
         recursive: Whether to include charts from subfolders
         skip_folder_name: Name of folders to skip (default: "Archive")
 
@@ -65,41 +69,55 @@ def get_chart_details(
         # Process charts in current folder
         if folder.get("charts"):
             for chart in folder["charts"]:
-                try:
-                    chart_details = get_chart(chart_id=chart["id"])
+                for attempt in range(max_retries):
+                    try:
+                        chart_details = get_chart(chart_id=chart["id"])
 
-                    # Skip charts without a proper title
-                    # NB: For some reason, there seem to tend to be a few blank charts per folder, not visible in the UI
-                    chart_title = chart_details["title"]
-                    if chart_title != "[ Insert title here ]":
+                        # Skip charts without a proper title
+                        # NB: For some reason, there seem to tend to be a few blank charts per folder, not visible in the UI
+                        chart_title = chart_details["title"]
+                        if chart_title != "[ Insert title here ]":
 
-                        # Get responsive iframe code
-                        try:
-                            iframe_code = get_iframe_code(chart_id=chart["id"], responsive=True)
-                        except Exception as iframe_error:
-                            print(f"    Warning: Could not get iframe code for chart {chart['id']}: {iframe_error}")
-                            iframe_code = "Error retrieving iframe code"
+                            # Get responsive iframe code
+                            for iframe_attempt in range(max_retries):  # Use max_retries argument
+                                try:
+                                    iframe_code = get_iframe_code(chart_id=chart["id"], responsive=True)
+                                    break
+                                except HTTPError as http_err:
+                                    wait_time = 2 ** iframe_attempt
+                                    print(f"    HTTP error occurred while retrieving iframe code for chart {chart['id']}: {http_err}. Retrying in {wait_time} seconds...")
+                                    time.sleep(wait_time)
+                                except Exception as iframe_error:
+                                    print(f"    Warning: Could not get iframe code for chart {chart['id']}: {iframe_error}")
+                                    iframe_code = "Error retrieving iframe code"
+                                    break
 
+                            chart_info = {
+                                "Folder path": current_path,
+                                "Chart title": chart_title,
+                                "Chart ID": chart["id"],
+                                "Chart number": "",
+                                "iframe code": iframe_code,
+                            }
+                            charts_data.append(chart_info)
+                            print(f"  Found chart: {chart['id']} - {chart_info['Chart title']}")
+                        break
+
+                    except HTTPError as http_err:
+                        wait_time = 2 ** attempt
+                        print(f"  HTTP error occurred while retrieving details for chart {chart['id']}: {http_err}. Retrying in {wait_time} seconds...")
+                        time.sleep(wait_time)
+                    except Exception as e:
                         chart_info = {
                             "Folder path": current_path,
-                            "Chart title": chart_title,
+                            "Chart title": "Error retrieving title",
                             "Chart ID": chart["id"],
                             "Chart number": "",
-                            "iframe code": iframe_code,
+                            "iframe code": "Error retrieving iframe code",
                         }
                         charts_data.append(chart_info)
-                        print(f"  Found chart: {chart['id']} - {chart_info['Chart title']}")
-
-                except Exception as e:
-                    chart_info = {
-                        "Folder path": current_path,
-                        "Chart title": "Error retrieving title",
-                        "Chart ID": chart["id"],
-                        "Chart number": "",
-                        "iframe code": "Error retrieving iframe code",
-                    }
-                    charts_data.append(chart_info)
-                    print(f"  Error getting details for chart {chart['id']}: {e}")
+                        print(f"  Error getting details for chart {chart['id']}: {e}")
+                        break
         if recursive and folder.get("children"):
             for child_folder in folder["children"]:
                 child_charts = get_chart_details(
