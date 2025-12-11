@@ -6,6 +6,7 @@ and handling responses.
 """
 
 import os
+import re
 
 import requests
 
@@ -136,3 +137,28 @@ def get_iframe_code(chart_id: str, responsive: bool = True) -> str:
 
     # Return an empty string if no matching embed code is found
     return ""
+
+
+def clean_filename(title: str) -> str:
+    """
+    Clean a title to make it safe for use as a Windows file name.
+
+    Parameters:
+        title: The original title string
+
+    Returns:
+        A cleaned title string
+    """
+    # Remove invalid characters for Windows file names
+    cleaned = re.sub(r'[\\/:*?"<>|\n\r\t]', "", title)
+
+    # Remove control characters (ASCII 0–31)
+    cleaned = "".join(ch for ch in cleaned if ord(ch) >= 32)
+
+    # Truncate to a safe length
+    cleaned = cleaned[:255]
+
+    # Strip leading/trailing whitespace and dots
+    cleaned = cleaned.strip().strip(".")
+
+    return cleaned
