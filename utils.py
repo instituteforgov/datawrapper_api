@@ -127,11 +127,12 @@ def get_iframe_code(chart_id: str, responsive: bool = True) -> str:
     """
     embed_data = make_api_request(f"/charts/{chart_id}/embed-codes")
 
-    # Handle case where response might be a list or dict
-    if isinstance(embed_data, list) and len(embed_data) > 0:
-        embed_data = embed_data[0]
+    # Ensure embed_data is a list
+    if isinstance(embed_data, list):
+        # Find the appropriate embed code based on the id
+        for item in embed_data:
+            if (responsive and item.get("id") == "responsive") or (not responsive and item.get("id") == "iframe"):
+                return item.get("code", "")
 
-    if responsive:
-        return embed_data.get("responsive", "")
-    else:
-        return embed_data.get("static", "")
+    # Return an empty string if no matching embed code is found
+    return ""
