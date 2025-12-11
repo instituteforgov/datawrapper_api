@@ -13,6 +13,7 @@
 import os
 
 import pandas as pd
+from pandas.io.formats import excel
 
 from utils import get_chart, get_folder, get_iframe_code, validate_api_token
 
@@ -130,6 +131,7 @@ charts_data = get_chart_details(
 )
 
 # Save details
+excel.ExcelFormatter.header_style = None
 if charts_data:
     df = pd.DataFrame(charts_data)
     df = df[["Folder path", "Chart title", "Chart ID", "Chart number", "iframe code"]]
