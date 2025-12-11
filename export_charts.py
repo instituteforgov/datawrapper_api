@@ -132,10 +132,12 @@ def export_charts(
             export_charts(
                 folder_id=child_folder["id"],
                 path=path,
+                output=output,
                 max_retries=max_retries,
                 recursive=recursive,
                 skip_folder_name=skip_folder_name,
                 chart_numbering_df=chart_numbering_df,
+                **kwargs,
             )
 
     return
