@@ -146,9 +146,9 @@ def export_charts(
 validate_api_token()
 
 # Import chart numbering
-if OUTPUT_PATH:
+if CHART_NUMBERING_FILE_PATH:
     df_chart_numbering = pd.read_excel(
-        OUTPUT_PATH,
+        CHART_NUMBERING_FILE_PATH,
         dtype={"Chart ID": str}
     )
 
