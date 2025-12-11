@@ -40,7 +40,7 @@ def get_chart_details(
         folder_id: The ID of the folder to list charts from
         dw_folder_path: Folder path within Datawrapper for tracking hierarchy
         recursive: Whether to include charts from subfolders
-        skip_folder_name: Name of folders to skip (default: 'Archive')
+        skip_folder_name: Name of folders to skip (default: "Archive")
 
     Returns:
         List of dictionaries containing chart information

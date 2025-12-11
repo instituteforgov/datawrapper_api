@@ -48,7 +48,7 @@ def export_charts(
             output: Export format (e.g. "png" or "svg")
             max_retries: Maximum number of retry attempts for chart export (default: 5)
             recursive: Whether to recursively browse sub-folders (default: False)
-            skip_folder_name: Name of folders to skip (default: 'Archive')
+            skip_folder_name: Name of folders to skip (default: "Archive")
             chart_numbering_df: DataFrame containing chart numbering lookup
             **kwargs: Additional keyword arguments to pass to the export_chart() function
 
@@ -78,10 +78,10 @@ def export_charts(
 
                 # Look up chart number from chart_numbering_df if provided
                 if chart_numbering_df is not None:
-                    chart_numbering_row = chart_numbering_df[chart_numbering_df['Chart ID'] == chart["id"]]
+                    chart_numbering_row = chart_numbering_df[chart_numbering_df["Chart ID"] == chart["id"]]
 
                     if not chart_numbering_row.empty:
-                        chart_number = chart_numbering_row.iloc[0]['Chart number']
+                        chart_number = chart_numbering_row.iloc[0]["Chart number"]
                         # Handle case where chart_number might be NaN
                         if pd.isna(chart_number):
                             filename = f"{chart["id"]}-{title.replace("/", "").replace(":", "")}"
@@ -125,7 +125,7 @@ def export_charts(
     # Recursively process child folders if recursive flag is True
     if recursive:
         for child_folder in folder["children"]:
-            path = path + f"/{folder['name']}"
+            path = path + f"/{folder["name"]}"
 
             if not os.path.exists(path):
                 os.makedirs(path)
