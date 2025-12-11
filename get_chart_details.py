@@ -79,22 +79,22 @@ def get_chart_details(
                             iframe_code = "Error retrieving iframe code"
 
                         chart_info = {
-                            "Chart number": "",
-                            "Chart ID": chart["id"],
+                            "Folder path": current_path,
                             "Chart title": chart_title,
+                            "Chart ID": chart["id"],
+                            "Chart number": "",
                             "iframe code": iframe_code,
-                            "Folder path": current_path
                         }
                         charts_data.append(chart_info)
                         print(f"  Found chart: {chart['id']} - {chart_info['Chart title']}")
 
                 except Exception as e:
                     chart_info = {
-                        "Chart number": "",
-                        "Chart ID": chart["id"],
+                        "Folder path": current_path,
                         "Chart title": "Error retrieving title",
+                        "Chart ID": chart["id"],
+                        "Chart number": "",
                         "iframe code": "Error retrieving iframe code",
-                        "Folder path": current_path
                     }
                     charts_data.append(chart_info)
                     print(f"  Error getting details for chart {chart['id']}: {e}")
@@ -132,12 +132,10 @@ charts_data = get_chart_details(
 # Save details
 if charts_data:
     df = pd.DataFrame(charts_data)
-    df = df[["Chart number", "Chart ID", "Chart title", "iframe code", "Folder path"]]
+    df = df[["Folder path", "Chart title", "Chart ID", "Chart number", "iframe code"]]
     df.to_excel(OUTPUT_PATH, index=False)
 
     print("-" * 50)
     print(f"Successfully saved {len(charts_data)} charts to {OUTPUT_PATH}")
 else:
     print("No charts found in the specified folder.")
-
-# %%
