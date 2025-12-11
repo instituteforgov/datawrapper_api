@@ -83,12 +83,12 @@ def export_charts(
                     if not chart_numbering_row.empty:
                         chart_number = chart_numbering_row.iloc[0]["Chart number"]
                         # Handle case where chart_number might be NaN
-                        if pd.isna(chart_number):
-                            filename = f"{chart["id"]}-{title.replace("/", "").replace(":", "")}"
-                            print(f"Chart ID {chart["id"]} has blank chart number. Using fallback name: {filename}")
-                        else:
-                            filename = str(chart_number)
+                        if pd.notna(chart_number):
+                            filename = f"{str(chart_number)}-{title_clean}"
                             print(f"Exporting chart {chart["id"]}-{title} as {filename}")
+                        else:
+                            filename = f"{chart["id"]}-{title_clean}"
+                            print(f"Chart ID {chart["id"]} has blank chart number. Using fallback name: {filename}")
 
                     # Fallback to original naming if chart ID not found in lookup
                     else:
@@ -125,14 +125,19 @@ def export_charts(
     # Recursively process child folders if recursive flag is True
     if recursive:
         for child_folder in folder["children"]:
-            path = path + f"/{folder["name"]}"
+            # If processing the top-level folder, use the base path directly
+            if folder_id == FOLDER_ID:
+                child_path = path
+            else:
+                # Construct the path for the child folder
+                child_path = os.path.join(path, folder["name"])
 
-            if not os.path.exists(path):
-                os.makedirs(path)
+            if not os.path.exists(child_path):
+                os.makedirs(child_path)
 
             export_charts(
                 folder_id=child_folder["id"],
-                path=path,
+                path=child_path,
                 output=output,
                 max_retries=max_retries,
                 recursive=recursive,
