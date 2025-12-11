@@ -22,9 +22,9 @@ from utils import export_chart, get_chart, get_folder, validate_api_token
 
 # %%
 # SET CONSTANTS
-BASE_FOLDER_ID = 320632
-BASE_PATH = "C:/Users/" + os.getlogin() + "/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/2. Hospitals"
-CHART_NUMBERING_FILE_PATH = BASE_PATH + "/Chart numbering - Hospitals.xlsx"
+FOLDER_ID = 320632
+OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Whitehall Monitor/Projects/2026/Charts"
+CHART_NUMBERING_FILE_PATH = OUTPUT_PATH + "/Chart numbering - WM2026.xlsx"
 
 
 # %%
@@ -146,15 +146,15 @@ def export_charts(
 validate_api_token()
 
 # Import chart numbering
-if CHART_NUMBERING_FILE_PATH:
+if OUTPUT_PATH:
     df_chart_numbering = pd.read_excel(
-        CHART_NUMBERING_FILE_PATH,
+        OUTPUT_PATH,
         dtype={"Chart ID": str}
     )
 
 # Initialise
 base_folder = get_folder(
-    folder_id=BASE_FOLDER_ID
+    folder_id=FOLDER_ID
 )
 print(base_folder["name"])
 
@@ -166,8 +166,8 @@ export_formats = {
 # Export charts
 for format, options in export_formats.items():
     export_charts(
-        folder_id=BASE_FOLDER_ID,
-        path=BASE_PATH,
+        folder_id=FOLDER_ID,
+        path=OUTPUT_PATH,
         output=format,
         recursive=True,
         skip_folder_name="Archive",
