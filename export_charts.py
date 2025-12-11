@@ -22,9 +22,9 @@ from utils import export_chart, get_chart, get_folder, validate_api_token
 
 # %%
 # SET CONSTANTS
-BASE_FOLDER_ID = 320631
-BASE_PATH = "C:/Users/" + os.getlogin() + "/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/1. General practice"
-CHART_NUMBERING_FILE_PATH = BASE_PATH + "/Chart numbering - General practice.xlsx"
+BASE_FOLDER_ID = 320632
+BASE_PATH = "C:/Users/" + os.getlogin() + "/INSTITUTE FOR GOVERNMENT/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/2. Hospitals"
+CHART_NUMBERING_FILE_PATH = BASE_PATH + "/Chart numbering - Hospitals.xlsx"
 
 
 # %%
@@ -35,6 +35,7 @@ def export_charts(
     output: str,
     max_retries: int = 5,
     recursive: bool = False,
+    skip_folder_name: str = "Archive",
     chart_numbering_df: pd.DataFrame | None = None,
     **kwargs,
 ) -> None:
@@ -47,19 +48,22 @@ def export_charts(
             output: Export format (e.g. "png" or "svg")
             max_retries: Maximum number of retry attempts for chart export (default: 5)
             recursive: Whether to recursively browse sub-folders (default: False)
+            skip_folder_name: Name of folders to skip (default: 'Archive')
             chart_numbering_df: DataFrame containing chart numbering lookup
-            **kwargs: Additional keyword arguments to pass to the export function
+            **kwargs: Additional keyword arguments to pass to the export_chart() function
 
         Returns:
             None
-
-        Notes:
-            - height="auto" is not the same as supplying None: the former exports the chart at its height in the Datawrapper UI, minus height required for the header and footer; the latter exports the chart at its full height (even where plain=True is supplied)
     """
 
     folder = get_folder(
         folder_id=folder_id
     )
+
+    # Skip folder if it matches the skip_folder_name
+    if folder["name"] == skip_folder_name:
+        print(f"Skipping folder: {folder['name']}")
+        return
 
     if folder["charts"]:
         for chart in folder["charts"]:
@@ -130,7 +134,8 @@ def export_charts(
                 path=path,
                 max_retries=max_retries,
                 recursive=recursive,
-                chart_numbering_df=chart_numbering_df
+                skip_folder_name=skip_folder_name,
+                chart_numbering_df=chart_numbering_df,
             )
 
     return
@@ -164,6 +169,8 @@ for format, options in export_formats.items():
         folder_id=BASE_FOLDER_ID,
         path=BASE_PATH,
         output=format,
+        recursive=True,
+        skip_folder_name="Archive",
         chart_numbering_df=df_chart_numbering,
         **options
     )

@@ -19,8 +19,8 @@ from utils import get_chart, get_folder, get_iframe_code, validate_api_token
 
 # %%
 # SET CONSTANTS
-FOLDER_ID = 320631
-OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Public services/Projects/Performance Tracker/PT2025/6. PT25 charts/1. General practice/Chart numbering - General practice.xlsx"
+FOLDER_ID = 340017
+OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Whitehall Monitor/Projects/2026/Charts/Chart numbering - WM2026.xlsx"
 
 
 # %%
@@ -29,6 +29,7 @@ def get_chart_details(
     folder_id: int,
     dw_folder_path: str = "",
     recursive: bool = False,
+    skip_folder_name: str = "Archive",
 ) -> list[dict]:
     """
     Get details all charts from a folder.
@@ -37,6 +38,7 @@ def get_chart_details(
         folder_id: The ID of the folder to list charts from
         dw_folder_path: Folder path within Datawrapper for tracking hierarchy
         recursive: Whether to include charts from subfolders
+        skip_folder_name: Name of folders to skip (default: 'Archive')
 
     Returns:
         List of dictionaries containing chart information
@@ -47,6 +49,11 @@ def get_chart_details(
     try:
         folder = get_folder(folder_id=folder_id)
         folder_name = folder["name"]
+
+        # Skip folder if it matches the skip_folder_name
+        if folder_name == skip_folder_name:
+            print(f"Skipping folder: {folder_name}")
+            return charts_data
 
         # Update folder path
         current_path = os.path.join(dw_folder_path, folder_name) if dw_folder_path else folder_name
@@ -96,7 +103,8 @@ def get_chart_details(
                 child_charts = get_chart_details(
                     folder_id=child_folder["id"],
                     recursive=True,
-                    dw_folder_path=current_path
+                    dw_folder_path=current_path,
+                    skip_folder_name=skip_folder_name
                 )
                 charts_data.extend(child_charts)
 
@@ -117,6 +125,8 @@ print("-" * 50)
 # Get all charts
 charts_data = get_chart_details(
     folder_id=FOLDER_ID,
+    recursive=True,
+    skip_folder_name="Archive"
 )
 
 # Save details
