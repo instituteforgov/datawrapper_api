@@ -163,7 +163,7 @@ validate_api_token()
 if CHART_NUMBERING_FILE_PATH:
     df_chart_numbering = pd.read_excel(
         CHART_NUMBERING_FILE_PATH,
-        dtype={"Chart ID": str}
+        dtype={"Chart number": str}
     )
 
 # Initialise
