@@ -19,7 +19,7 @@ import time
 import pandas as pd
 from requests.exceptions import HTTPError, ReadTimeout
 
-from utils import clean_filename, export_chart, get_chart, get_folder, validate_api_token
+from utils import sanitise_string, export_chart, get_chart, get_folder, validate_api_token
 
 # %%
 # SET CONSTANTS
@@ -70,7 +70,8 @@ def export_charts(
 
     # Create subdirectory for this folder (unless it's the root or flattened)
     if folder_id != FOLDER_ID and not flatten_path:
-        path = os.path.join(path, folder["name"])
+        folder_name = sanitise_string(folder["name"])
+        path = os.path.join(path, folder_name)
         if not os.path.exists(path):
             os.makedirs(path)
 
@@ -89,8 +90,9 @@ def export_charts(
                     if not chart_numbering_row.empty:
                         chart_number = chart_numbering_row.iloc[0]["Chart number"]
                         # Handle case where chart_number might be NaN
+                        # XXX
                         if pd.notna(chart_number):
-                            filename = f"{str(chart_number)}-{title}"
+                            filename = f"Figure {str(chart_number)}-{title}"
                             print(f"Exporting chart {chart["id"]}-{title} as {filename}")
                         else:
                             filename = f"{chart["id"]}-{title}"
@@ -106,7 +108,7 @@ def export_charts(
                     print(f"Exporting chart {chart["id"]}-{title} as {filename}")
 
                 # Remove characters that break file paths from filename
-                filename = clean_filename(filename)
+                filename = sanitise_string(filename)
 
                 for attempt in range(max_retries):
 
@@ -184,6 +186,7 @@ for format, options in export_formats.items():
         output=format,
         recursive=True,
         skip_folder_name="Archive",
+        flatten_path=True,
         chart_numbering_df=df_chart_numbering,
         **options
     )

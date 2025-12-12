@@ -139,18 +139,18 @@ def get_iframe_code(chart_id: str, responsive: bool = True) -> str:
     return ""
 
 
-def clean_filename(title: str) -> str:
+def sanitise_string(input_string: str) -> str:
     """
-    Clean a title to make it safe for use as a Windows file name.
+    Clean a string to make it safe for use in a Windows file or folder path.
 
     Parameters:
-        title: The original title string
+        input_string: The original string
 
     Returns:
-        A cleaned title string
+        A cleaned string
     """
     # Remove invalid characters for Windows file names
-    cleaned = re.sub(r'[\\/:*?"<>|\n\r\t]', "", title)
+    cleaned = re.sub(r'[\\/:*?"<>|\n\r\t]', "", input_string)
 
     # Remove control characters (ASCII 0–31)
     cleaned = "".join(ch for ch in cleaned if ord(ch) >= 32)
