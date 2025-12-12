@@ -68,6 +68,12 @@ def export_charts(
         print(f"Skipping folder: {folder['name']}")
         return
 
+    # Create subdirectory for this folder (unless it's the root or flattened)
+    if folder_id != FOLDER_ID and not flatten_path:
+        path = os.path.join(path, folder["name"])
+        if not os.path.exists(path):
+            os.makedirs(path)
+
     if folder["charts"]:
         for chart in folder["charts"]:
 
@@ -133,23 +139,9 @@ def export_charts(
     # Recursively process child folders if recursive flag is True
     if recursive:
         for child_folder in folder["children"]:
-            # If processing the top-level folder, use the base path directly
-            if folder_id == FOLDER_ID:
-                child_path = path
-            else:
-                # Determine the path for saving charts
-                if flatten_path:
-                    child_path = path  # Use the root path for all charts
-                else:
-                    # Construct the path for the child folder
-                    child_path = os.path.join(path, folder["name"])
-
-            if not os.path.exists(child_path):
-                os.makedirs(child_path)
-
             export_charts(
                 folder_id=child_folder["id"],
-                path=child_path,
+                path=path,
                 output=output,
                 max_retries=max_retries,
                 recursive=recursive,
