@@ -90,9 +90,8 @@ def export_charts(
                     if not chart_numbering_row.empty:
                         chart_number = chart_numbering_row.iloc[0]["Chart number"]
                         # Handle case where chart_number might be NaN
-                        # XXX
                         if pd.notna(chart_number):
-                            filename = f"Figure {str(chart_number)}-{title}"
+                            filename = f"{str(chart_number)}-{title}"
                             print(f"Exporting chart {chart["id"]}-{title} as {filename}")
                         else:
                             filename = f"{chart["id"]}-{title}"
