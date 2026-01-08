@@ -25,7 +25,7 @@ from utils import sanitise_string, export_chart, get_chart, get_folder, validate
 # SET CONSTANTS
 FOLDER_ID = 340017
 OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Whitehall Monitor/Projects/2026/Charts"
-CHART_NUMBERING_FILE_PATH = OUTPUT_PATH + "/Chart numbering - WM2026.xlsx"
+CHART_NUMBERING_FILE_PATH = OUTPUT_PATH + "/Datawrapper chart numbering - WM2026.xlsx"
 
 
 # %%
