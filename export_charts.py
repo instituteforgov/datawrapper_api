@@ -9,8 +9,6 @@
         - svg/png: Various
     Notes
         - Sometimes files need to be saved to e.g. Downloads, as long file names mean they cannot always be saved in the intended location
-    Future enhancements
-        - Add arg to skip charts without a chart number in the lookup file
 """
 
 import os
