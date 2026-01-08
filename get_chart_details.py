@@ -22,8 +22,8 @@ from utils import get_chart, get_folder, get_iframe_code, validate_api_token
 
 # %%
 # SET CONSTANTS
-FOLDER_ID = 340017
-OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Institute for Government/Research - Whitehall Monitor/Projects/2026/Charts"
+FOLDER_ID = 376208
+OUTPUT_PATH = "C:/Users/" + os.getlogin() + "/Downloads"
 CHART_NUMBERING_FILE_PATH = OUTPUT_PATH + "/Datawrapper chart numbering - WM2026.xlsx"
 
 
@@ -139,7 +139,7 @@ def get_chart_details(
 validate_api_token()
 
 print(f"Listing charts from folder ID: {FOLDER_ID}")
-print(f"Output file: {OUTPUT_PATH}")
+print(f"Output file: {CHART_NUMBERING_FILE_PATH}")
 print("-" * 50)
 
 # Get all charts
@@ -154,9 +154,11 @@ excel.ExcelFormatter.header_style = None
 if charts_data:
     df = pd.DataFrame(charts_data)
     df = df[["Folder path", "Chart title", "Chart ID", "Chart number", "iframe code"]]
-    df.to_excel(OUTPUT_PATH, index=False)
+    df.to_excel(CHART_NUMBERING_FILE_PATH, index=False)
 
     print("-" * 50)
-    print(f"Successfully saved {len(charts_data)} charts to {OUTPUT_PATH}")
+    print(f"Successfully saved {len(charts_data)} charts to {CHART_NUMBERING_FILE_PATH}")
 else:
     print("No charts found in the specified folder.")
+
+# %%
