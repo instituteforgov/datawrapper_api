@@ -16,6 +16,30 @@ DATAWRAPPER_API_BASE = "https://api.datawrapper.de/v3"
 DATAWRAPPER_API_TOKEN = os.getenv("DATAWRAPPER_API_TOKEN")
 
 
+def publish_chart(chart_id: str) -> dict:
+    """
+    Publish a chart on Datawrapper.
+
+    Parameters:
+        chart_id: The ID of the chart to publish
+
+    Returns:
+        JSON response as dictionary
+
+    Raises:
+        requests.exceptions.HTTPError: If the API request fails
+    """
+    headers = {
+        "Authorization": f"Bearer {DATAWRAPPER_API_TOKEN}",
+        "Content-Type": "application/json"
+    }
+
+    endpoint = f"{DATAWRAPPER_API_BASE}/charts/{chart_id}/publish"
+    response = requests.post(endpoint, headers=headers)
+    response.raise_for_status()
+    return response.json()
+
+
 def validate_api_token() -> None:
     """
     Validate that the Datawrapper API token is available.

@@ -19,7 +19,7 @@ import time
 import pandas as pd
 from requests.exceptions import HTTPError, ReadTimeout
 
-from utils import sanitise_string, export_chart, get_chart, get_folder, validate_api_token
+from utils import sanitise_string, export_chart, get_chart, get_folder, validate_api_token, publish_chart
 
 # %%
 # SET CONSTANTS
@@ -38,6 +38,7 @@ def export_charts(
     recursive: bool = False,
     skip_folder_name: str = "Archive",
     flatten_path: bool = False,
+    publish: bool = True,
     chart_numbering_df: pd.DataFrame | None = None,
     **kwargs,
 ) -> None:
@@ -52,6 +53,7 @@ def export_charts(
             recursive: Whether to recursively browse sub-folders (default: False)
             skip_folder_name: Name of folders to skip (default: "Archive")
             flatten_path: Whether to flatten the folder structure in the export path (default: False)
+            publish: Whether to publish unpublished charts (default: True)
             chart_numbering_df: DataFrame containing chart numbering lookup
             **kwargs: Additional keyword arguments to pass to the export_chart() function
 
@@ -80,8 +82,17 @@ def export_charts(
 
             # Skip charts without a proper title
             # NB: For some reason, there seem to tend to be a few blank charts per folder, not visible in the UI
-            title = get_chart(chart_id=chart["id"])["title"]
+            chart_details = get_chart(chart_id=chart["id"])
+            title = chart_details["title"]
             if title != "[ Insert title here ]":
+
+                # Publish chart if it's not already published and publish flag is True
+                if publish and not chart_details.get("publicVersion"):
+                    try:
+                        publish_chart(chart_id=chart["id"])
+                        print(f"Published chart {chart['id']}-{title}")
+                    except HTTPError as e:
+                        print(f"Failed to publish chart {chart['id']}-{title}: {e}")
 
                 # Look up chart number from chart_numbering_df if provided
                 if chart_numbering_df is not None:
@@ -148,6 +159,7 @@ def export_charts(
                 recursive=recursive,
                 skip_folder_name=skip_folder_name,
                 flatten_path=flatten_path,
+                publish=publish,
                 chart_numbering_df=chart_numbering_df,
                 **kwargs,
             )
