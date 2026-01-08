@@ -43,7 +43,7 @@ def export_charts(
     **kwargs,
 ) -> None:
     """"
-        Parse folder structure and export all charts.
+        Export charts in a folder, optionally operating recursively.
 
         Parameters:
             folder_id: The ID of the base folder
