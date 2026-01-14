@@ -17,7 +17,7 @@ import os
 import pandas as pd
 from requests.exceptions import HTTPError
 
-from utils import sanitise_string, export_chart, get_chart, get_folder, validate_api_token, publish_chart, normalise_export_formats, set_chart_filename
+from utils import sanitise_string, export_chart, get_chart, get_folder, validate_api_token, publish_chart, normalise_export_formats, set_chart_filename, check_alt_text, check_title
 
 logger = logging.getLogger(__name__)
 
@@ -48,6 +48,8 @@ def collect_charts_for_export(
     export_formats: str | list[str] | dict[str, dict],
     recursive: bool = False,
     skip_folder_name: str = "Archive",
+    check_chart_title: bool = True,
+    check_chart_alt_text: bool = True,
     publish: bool = True,
     chart_numbering_df: pd.DataFrame | None = None,
     folder_path: list[str] | None = None,
@@ -64,6 +66,8 @@ def collect_charts_for_export(
             - Dict: {"svg": {"plain": True}, "png": {"plain": False}}
         recursive: Whether to recursively browse sub-folders (default: False)
         skip_folder_name: Name of folders to skip (default: "Archive")
+        check_chart_title: Whether to check chart titles for problematic characters
+        check_chart_alt_text: Whether to check for missing alt text
         publish: Whether to publish unpublished charts (default: True)
         chart_numbering_df: DataFrame containing chart numbering lookup
         folder_path: Internal parameter for tracking folder path during recursion
@@ -103,6 +107,17 @@ def collect_charts_for_export(
             # Skip charts without proper title
             if title == "[ Insert title here ]":
                 continue
+
+            # Check chart title for problematic characters
+            if check_chart_title:
+                title_issues = check_title(chart_details["title"])
+                if title_issues:
+                    logger.warning(f"Chart {chart['id']} ('{chart_details['title']}') has title issues: {', '.join(title_issues)}")
+
+            # Check for missing alt text
+            if check_chart_alt_text:
+                if check_alt_text(chart_details):
+                    logger.warning(f"Chart {chart['id']} ('{chart_details['title']}') is missing alt text")
 
             # Set filename
             filename = set_chart_filename(
@@ -216,6 +231,8 @@ charts = collect_charts_for_export(
     export_formats=EXPORT_FORMATS,
     recursive=True,
     skip_folder_name="Archive",
+    check_chart_title=True,
+    check_chart_alt_text=True,
     publish=True,
     chart_numbering_df=df_chart_numbering,
 )

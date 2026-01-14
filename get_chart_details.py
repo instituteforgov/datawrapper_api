@@ -16,7 +16,7 @@ import os
 import pandas as pd
 from pandas.io.formats import excel
 
-from utils import get_chart, get_folder, get_iframe_code, validate_api_token
+from utils import get_chart, get_folder, get_iframe_code, validate_api_token, check_alt_text, check_title
 
 logger = logging.getLogger(__name__)
 
@@ -35,6 +35,8 @@ def get_chart_details(
     dw_folder_path: str = "",
     recursive: bool = False,
     skip_folder_name: str = "Archive",
+    check_chart_title: bool = True,
+    check_chart_alt_text: bool = True,
 ) -> list[dict]:
     """
     Get details all charts from a folder.
@@ -44,6 +46,8 @@ def get_chart_details(
         dw_folder_path: Folder path within Datawrapper for tracking hierarchy
         recursive: Whether to include charts from subfolders
         skip_folder_name: Name of folders to skip (default: "Archive")
+        check_chart_title: Whether to check chart titles for problematic characters
+        check_chart_alt_text: Whether to check for missing alt text
 
     Returns:
         List of dictionaries containing chart information
@@ -83,11 +87,26 @@ def get_chart_details(
                             logger.warning(f"Could not get iframe code for chart {chart['id']}: {iframe_error}")
                             iframe_code = "Error retrieving iframe code"
 
+                        # Check chart title for problematic characters
+                        if check_chart_title:
+                            title_issues = check_title(chart_title)
+                            title_issues_str = "; ".join(title_issues) if title_issues else ""
+                        else:
+                            title_issues_str = ""
+
+                        # Check for missing alt text
+                        if check_chart_alt_text:
+                            missing_alt_text = "Yes" if check_alt_text(chart_details) else ""
+                        else:
+                            missing_alt_text = ""
+
                         chart_info = {
                             "Folder path": current_path,
                             "Chart title": chart_title,
                             "Chart ID": chart["id"],
                             "Chart number": "",
+                            "Title issues": title_issues_str,
+                            "Missing alt text": missing_alt_text,
                             "iframe code": iframe_code,
                         }
                         charts_data.append(chart_info)
@@ -99,6 +118,8 @@ def get_chart_details(
                         "Chart title": "Error retrieving title",
                         "Chart ID": chart["id"],
                         "Chart number": "",
+                        "Title issues": "",
+                        "Missing alt text": "",
                         "iframe code": "Error retrieving iframe code",
                     }
                     charts_data.append(chart_info)
@@ -137,14 +158,16 @@ logger.info("-" * 50)
 charts_data = get_chart_details(
     folder_id=FOLDER_ID,
     recursive=True,
-    skip_folder_name="Archive"
+    skip_folder_name="Archive",
+    check_chart_title=True,
+    check_chart_alt_text=True,
 )
 
 # Save details
 excel.ExcelFormatter.header_style = None
 if charts_data:
     df = pd.DataFrame(charts_data)
-    df = df[["Folder path", "Chart title", "Chart ID", "Chart number", "iframe code"]]
+    df = df[["Folder path", "Chart title", "Chart ID", "Chart number", "Title issues", "Missing alt text", "iframe code"]]
     df.to_excel(CHART_NUMBERING_FILE_PATH, index=False)
 
     logger.info("-" * 50)

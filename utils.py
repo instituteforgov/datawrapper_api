@@ -215,6 +215,55 @@ def get_iframe_code(chart_id: str, responsive: bool = True) -> str:
     return ""
 
 
+def check_title(title: str) -> list[str]:
+    """
+    Check chart title for characters that are often unwanted and can cause problems in things like embed codes.
+
+    Parameters:
+        title: The chart title to check
+
+    Returns:
+        List of issue descriptions found (empty list if no issues)
+    """
+    issues = []
+
+    if "\n" in title or "\r" in title:
+        issues.append("Line break(s) (\\n or \\r)")
+
+    if "<br>" in title.lower() or "<br/>" in title.lower() or "<br />" in title.lower():
+        issues.append("HTML line break(s) (<br>)")
+
+    if "&nbsp;" in title or "\u00a0" in title:
+        issues.append("Non-breaking space(s)")
+
+    html_entities = ["&lt;", "&gt;", "&amp;", "&quot;"]
+    found_entities = [entity for entity in html_entities if entity in title]
+    if found_entities:
+        issues.append(f"HTML entities ({', '.join(found_entities)})")
+
+    if "\u200b" in title:
+        issues.append("Zero-width space(s)")
+
+    if "\ufeff" in title:
+        issues.append("Byte order mark (BOM)")
+
+    return issues
+
+
+def check_alt_text(chart_details: dict) -> bool:
+    """
+    Check if chart has alt text (aria-description).
+
+    Parameters:
+        chart_details: Chart details dictionary from Datawrapper API
+
+    Returns:
+        True if alt text is missing or empty after stripping whitespace, False otherwise
+    """
+    alt_text = chart_details.get("metadata", {}).get("describe", {}).get("aria-description", "")
+    return not alt_text.strip()
+
+
 def sanitise_string(input_string: str) -> str:
     """
     Clean a string to make it safe for use in a Windows file or folder path.
