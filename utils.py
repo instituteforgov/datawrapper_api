@@ -206,7 +206,10 @@ def get_iframe_code(chart_id: str, responsive: bool = True) -> str:
         # Find the appropriate embed code based on the id
         for item in embed_data:
             if (responsive and item.get("id") == "responsive") or (not responsive and item.get("id") == "iframe"):
-                return item.get("code", "")
+                code = item.get("code", "")
+                if 'src="null"' in code:
+                    return 'Retrieving iframe code unsuccessful (contains \'src="null"\') - retrieve the code manually'
+                return code
 
     # Return an empty string if no matching embed code is found
     return ""
